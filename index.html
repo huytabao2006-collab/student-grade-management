@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Điểm Học Tập - Cao đẳng Công nghiệp Thái Nguyên</title>
+    <!-- Thư viện phục vụ Bước 10: Lưu trữ hồ sơ điện tử Excel và PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #b22222;
+            --secondary-color: #2c3e50;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1250px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+        }
+
+        .auth-section, .main-section {
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .welcome-bar {
+            background-color: #eef2f7;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .class-info {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary-color);
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 14px;
+            border-radius: 0 4px 4px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .status-badge {
+            background: #e2e8f0;
+            padding: 5px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #0f172a;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        th.num, td.num {
+            width: 60px;
+        }
+
+        td input[type="number"] {
+            width: 65px;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .sub {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary { background-color: #2563eb; color: white; }
+        .btn-warning { background-color: #d97706; color: white; }
+        .btn-info { background-color: #0891b2; color: white; }
+        .btn-purple { background-color: #9333ea; color: white; }
+        .btn-teal { background-color: #0d9488; color: white; }
+        .btn-success { background-color: #16a34a; color: white; }
+        .btn-danger { background-color: #dc2626; color: white; }
+        .btn-gray { background-color: #475569; color: white; }
+
+        button:hover { opacity: 0.9; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Hệ Thống Quản Lý Điểm Học Tập - Cao đẳng Công nghiệp Thái Nguyên</h1>
+
+    <!-- 1. ĐĂNG NHẬP / CHỌN VAI TRÒ (ĐỦ 4 TÁC NHÂN) -->
+    <div id="auth-section" class="auth-section">
+        <h2>Đăng Nhập Hệ Thống</h2>
+        <div class="form-group">
+            <label for="role-select">Chọn Vai Trò Nghiệp Vụ:</label>
+            <select id="role-select">
+                <option value="Nhà giáo giảng dạy">Nhà giáo giảng dạy (Bước 1, 2, 4, 6, 10)</option>
+                <option value="Nhà giáo chấm thi">Nhà giáo chấm thi (Bước 4)</option>
+                <option value="Khoa chuyên môn">Khoa chuyên môn (Bước 5, 10)</option>
+                <option value="Phòng ĐT&NCKH">Phòng ĐT&NCKH (Bước 7, 10)</option>
+            </select>
+        </div>
+        <button class="btn-primary" onclick="login()">Đăng Nhập</button>
+    </div>
+
+    <!-- 2. MÀN HÌNH QUẢN LÝ ĐIỂM -->
+    <div id="main-section" class="main-section hidden">
+        <div class="welcome-bar">
+            <div>Xin chào: <strong id="user-role-display">Nhà giáo giảng dạy</strong></div>
+            <button class="btn-danger" onclick="logout()">Đăng Xuất</button>
+        </div>
+
+        <div class="class-info">
+            <div>Môn học: <b>Lập trình Web</b> &nbsp;|&nbsp; Lớp: <b>C22-CNTT1</b> &nbsp;|&nbsp; Học kỳ: <b>HK1 2026</b></div>
+            <div>Trạng thái phiếu: <span id="sheet-status" class="status-badge">Đang nhập (Nháp)</span></div>
+        </div>
+
+        <div id="print-area">
+            <h2>Bảng Điểm Chi Tiết Lớp Học (BM/01, BM/02, BM/03)</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="num">STT</th>
+                            <th>MSSV</th>
+                            <th>Họ tên</th>
+                            <th class="num">Điểm TX (HS 1)</th>
+                            <th class="num">Điểm ĐK (HS 2)</th>
+                            <th class="num">Điểm TBC (0.4)</th>
+                            <th class="num">ĐK Dự thi</th>
+                            <th class="num">Điểm Thi (0.6)</th>
+                            <th class="num">Tổng kết (10)</th>
+                            <th class="num">Điểm Chữ</th>
+                            <th class="num">Thang 4</th>
+                        </tr>
+                    </thead>
+                    <tbody id="student-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <p class="sub">
+            * Quy tắc tính điểm: TBC = (TX + ĐK*2)/3. ĐK dự thi: TBC &ge; 5.0 (Đạt). Tổng kết = TBC*0.4 + Thi*0.6. Quy đổi: A (8.5-10), B (7.0-8.4), C (5.5-6.9), D (4.0-5.4), F (&lt;4.0).
+        </p>
+
+        <!-- 7 BƯỚC HÀNH ĐỘNG NGHIỆP VỤ ĐẦY ĐỦ -->
+        <div class="btn-group">
+            <button class="btn-primary" onclick="saveStep1()">Lưu điểm TX & ĐK (Bước 1)</button>
+            <button class="btn-warning" onclick="checkStep2()">Xét điều kiện thi (Bước 2)</button>
+            <button class="btn-info" onclick="mergeStep4Exam()">Ghép điểm thi kết thúc (Bước 4)</button>
+            <button class="btn-purple" onclick="calcStep4Final()">Tổng hợp điểm môn học (Bước 4)</button>
+            <button class="btn-teal" onclick="approveStep5()">Ký duyệt cấp Khoa (Bước 5)</button>
+            <button class="btn-success" onclick="sendStep6()">Gửi phiếu về Phòng ĐT&NCKH (Bước 6)</button>
+            <button class="btn-danger" onclick="finalizeStep7()">Tổng hợp điểm lên phần mềm (Bước 7)</button>
+            
+            <!-- Bước 10: Lưu trữ hồ sơ điểm -->
+            <button class="btn-gray" onclick="exportExcelStep10()">↓ Xuất Excel lưu trữ (Bước 10)</button>
+            <button class="btn-gray" onclick="exportPDFStep10()">↓ Xuất PDF lưu trữ (Bước 10)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let students = [
+        { id: 1, mssv: "20210001", name: "Nguyễn Văn A", tx: 8, dk: 7, thi: 8 },
+        { id: 2, mssv: "20210002", name: "Trần Thị B", tx: 4, dk: 3, thi: 6 },
+        { id: 3, mssv: "20210003", name: "Lê Văn C", tx: 9, dk: 9, thi: 9.5 }
+    ];
+
+    let currentRole = "";
+
+    function login() {
+        currentRole = document.getElementById("role-select").value;
+        document.getElementById("user-role-display").innerText = currentRole;
+        document.getElementById("auth-section").classList.add("hidden");
+        document.getElementById("main-section").classList.remove("hidden");
+        renderTable();
+    }
+
+    function logout() {
+        document.getElementById("auth-section").classList.remove("hidden");
+        document.getElementById("main-section").classList.add("hidden");
+    }
+
+    function calculateGrades(s) {
+        var tx = s.tx !== "" && s.tx !== null ? Number(s.tx) : null;
+        var dk = s.dk !== "" && s.dk !== null ? Number(s.dk) : null;
+        var thi = s.thi !== "" && s.thi !== null ? Number(s.thi) : null;
+
+        var tbc = (tx !== null && dk !== null) ? ((tx + dk * 2) / 3) : null;
+        var du_dieu_kien = tbc !== null ? (tbc >= 5.0) : false;
+        var tong_ket = (tbc !== null && thi !== null && du_dieu_kien) ? (tbc * 0.4 + thi * 0.6) : null;
+
+        var diem_chu = "-";
+        var thang_4 = "-";
+
+        if (tong_ket !== null) {
+            if (tong_ket >= 8.5) { diem_chu = "A"; thang_4 = "4.0"; }
+            else if (tong_ket >= 7.0) { diem_chu = "B"; thang_4 = "3.0"; }
+            else if (tong_ket >= 5.5) { diem_chu = "C"; thang_4 = "2.0"; }
+            else if (tong_ket >= 4.0) { diem_chu = "D"; thang_4 = "1.0"; }
+            else { diem_chu = "F"; thang_4 = "0.0"; }
+        }
+
+        return {
+            tbc: tbc !== null ? tbc.toFixed(1) : "-",
+            du_dk: tbc !== null ? (du_dieu_kien ? "<span style='color:green;font-weight:600'>Đạt</span>" : "<span style='color:red;font-weight:600'>KĐ</span>") : "-",
+            tong_ket: tong_ket !== null ? tong_ket.toFixed(1) : "-",
+            diem_chu: diem_chu,
+            thang_4: thang_4
+        };
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById("student-table-body");
+        tbody.innerHTML = "";
+
+        students.forEach((s, index) => {
+            const res = calculateGrades(s);
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${s.mssv}</td>
+                <td style="text-align: left;">${s.name}</td>
+                <td><input type="number" step="0.1" min="0" max="10" value="${s.tx !== null ? s.tx : ''}" onchange="updateScore(${index}, 'tx', this.value)"></td>
+                <td><input type="number" step="0.1" min="0" max="10" value="${s.dk !== null ? s.dk : ''}" onchange="updateScore(${index}, 'dk', this.value)"></td>
+                <td><strong>${res.tbc}</strong></td>
+                <td>${res.du_dk}</td>
+                <td><input type="number" step="0.1" min="0" max="10" value="${s.thi !== null ? s.thi : ''}" onchange="updateScore(${index}, 'thi', this.value)"></td>
+                <td><strong>${res.tong_ket}</strong></td>
+                <td><strong>${res.diem_chu}</strong></td>
+                <td><strong>${res.thang_4}</strong></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function updateScore(index, field, val) {
+        if (val !== "") {
+            let num = parseFloat(val);
+            if (num < 0) val = "0";
+            if (num > 10) val = "10";
+        }
+        students[index][field] = val !== "" ? parseFloat(val) : null;
+        renderTable();
+    }
+
+    function saveStep1() {
+        alert("[Bước 1] Nhà giáo giảng dạy đã lưu điểm Thường xuyên & Định kỳ thành công!");
+    }
+
+    function checkStep2() {
+        alert("[Bước 2] Hệ thống đã tự động xét Điều kiện dự thi dựa trên TBC (>= 5.0 là Đạt)!");
+        renderTable();
+    }
+
+    function mergeStep4Exam() {
+        if (currentRole !== "Nhà giáo chấm thi" && currentRole !== "Phòng ĐT&NCKH") {
+            alert("LỖI PHÂN QUYỀN: Chỉ có 'Nhà giáo chấm thi' mới có quyền ghép điểm thi kết thúc!");
+            return;
+        }
+        alert("[Bước 4] Nhà giáo chấm thi đã nhập/ghép điểm thi kết thúc thành công!");
+    }
+
+    function calcStep4Final() {
+        alert("[Bước 4] Nhà giáo giảng dạy tổng hợp điểm môn học, tự động quy đổi Điểm chữ và Thang 4 thành công!");
+        renderTable();
+    }
+
+    function approveStep5() {
+        if (currentRole !== "Khoa chuyên môn") {
+            alert("LỖI PHÂN QUYỀN: Chỉ có 'Khoa chuyên môn' (Trưởng/Phó khoa) mới có quyền Ký duyệt cấp Khoa!");
+            return;
+        }
+        document.getElementById("sheet-status").innerText = "Khoa đã duyệt";
+        document.getElementById("sheet-status").style.background = "#dbeafe";
+        document.getElementById("sheet-status").style.color = "#1d4ed8";
+        alert("[Bước 5] Khoa chuyên môn đã kiểm tra và ký duyệt kết quả học tập thành công!");
+    }
+
+    function sendStep6() {
+        document.getElementById("sheet-status").innerText = "Đã gửi Phòng ĐT&NCKH";
+        document.getElementById("sheet-status").style.background = "#fef3c7";
+        document.getElementById("sheet-status").style.color = "#b45309";
+        alert("[Bước 6] Đã gửi phiếu điểm bản gốc về Phòng ĐT&NCKH thành công!");
+    }
+
+    function finalizeStep7() {
+        if (currentRole !== "Phòng ĐT&NCKH") {
+            alert("LỖI PHÂN QUYỀN: Chỉ có 'Phòng ĐT&NCKH' mới có quyền Tổng hợp điểm lên phần mềm!");
+            return;
+        }
+        document.getElementById("sheet-status").innerText = "Đã tổng hợp & Khóa sổ";
+        document.getElementById("sheet-status").style.background = "#dcfce7";
+        document.getElementById("sheet-status").style.color = "#15803d";
+        alert("[Bước 7] Phòng ĐT&NCKH đã tổng hợp điểm lên phần mềm và Khóa sổ thành công!");
+    }
+
+    // Bước 10: Xuất file lưu trữ Excel
+    function exportExcelStep10() {
+        let exportData = students.map((s, idx) => {
+            let res = calculateGrades(s);
+            return {
+                "STT": idx + 1,
+                "MSSV": s.mssv,
+                "Họ và tên": s.name,
+                "Điểm TX": s.tx,
+                "Điểm ĐK": s.dk,
+                "Điểm TBC": res.tbc,
+                "ĐK Dự thi": res.du_dk.includes("Đạt") ? "Đạt" : "KĐ",
+                "Điểm Thi": s.thi,
+                "Tổng kết 10": res.tong_ket,
+                "Điểm Chữ": res.diem_chu,
+                "Thang 4": res.thang_4
+            };
+        });
+        let ws = XLSX.utils.json_to_sheet(exportData);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "PhieuDiem");
+        XLSX.writeFile(wb, "Ho_so_diem_Lop_C22-CNTT1.xlsx");
+        alert("[Bước 10] Đã xuất file Excel lưu trữ hồ sơ điểm thành công!");
+    }
+
+    // Bước 10: Xuất file lưu trữ PDF
+    function exportPDFStep10() {
+        let element = document.getElementById("print-area");
+        let opt = {
+            margin: 10,
+            filename: 'Ho_so_diem_Lop_C22-CNTT1.pdf',
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+            alert("[Bước 10] Đã xuất file PDF Phiếu kết quả học tập lưu trữ thành công!");
+        });
+    }
+</script>
+
+</body>
+</html>
