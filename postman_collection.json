@@ -1,0 +1,557 @@
+{
+	"info": {
+		"_postman_id": "7b8f9e01-2026-cdcn-pttk-4actor-7step",
+		"name": "Hệ thống Quản lý Điểm học tập - CDCNTN (API Collection)",
+		"description": "Bộ sưu tập kiểm thử RESTful API chuẩn hóa theo 7 bước quy trình và 4 tác nhân nghiệp vụ tại Trường Cao đẳng Công nghiệp Thái Nguyên.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "0. Xác thực & Đăng nhập (Authentication)",
+			"item": [
+				{
+					"name": "POST /api/v1/auth/login (4 Vai trò)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"an.nguyen@cdcn.edu.vn\",\n  \"mat_khau\": \"password123\",\n  \"vai_tro\": \"Nhà giáo giảng dạy\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Đăng nhập và nhận JWT token phân quyền theo 4 vai trò: Nhà giáo giảng dạy, Nhà giáo chấm thi, Khoa chuyên môn, Phòng ĐT&NCKH."
+					},
+					"response": [
+						{
+							"name": "200 Login Success",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Đăng nhập thành công\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"ma_nguoi_dung\": \"GV01\",\n    \"ho_va_ten\": \"Nguyễn Văn An\",\n    \"vai_tro\": \"Nhà giáo giảng dạy\"\n  }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bước 1. Nhập điểm thường xuyên & định kỳ",
+			"item": [
+				{
+					"name": "PUT /api/v1/nha-giao-giang-day/diem-thuong-xuyen-dinh-ky",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_gvg}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ma_phieu\": \"PKQ-WEB-01\",\n  \"danh_sach_diem\": [\n    {\n      \"ma_hssv\": \"20210001\",\n      \"diem_tx\": 8.0,\n      \"diem_dk\": 7.0,\n      \"ghi_chu\": \"Chuyên cần tốt\"\n    },\n    {\n      \"ma_hssv\": \"20210002\",\n      \"diem_tx\": 4.0,\n      \"diem_dk\": 3.0,\n      \"ghi_chu\": \"Nghỉ 2 buổi có phép\"\n    },\n    {\n      \"ma_hssv\": \"20210003\",\n      \"diem_tx\": 9.0,\n      \"diem_dk\": 9.0,\n      \"ghi_chu\": \"Tích cực phát biểu\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/nha-giao-giang-day/diem-thuong-xuyen-dinh-ky",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"nha-giao-giang-day",
+								"diem-thuong-xuyen-dinh-ky"
+							]
+						},
+						"description": "Nhà giáo giảng dạy nhập điểm kiểm tra thường xuyên (hệ số 1) và định kỳ (hệ số 2)."
+					},
+					"response": [
+						{
+							"name": "200 Success",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Cập nhật điểm kiểm tra thường xuyên và định kỳ thành công.\",\n  \"so_luong\": 3\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bước 2. Xét điều kiện dự thi",
+			"item": [
+				{
+					"name": "POST /api/v1/nha-giao-giang-day/xet-dieu-kien-thi",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_gvg}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ma_phieu\": \"PKQ-WEB-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/nha-giao-giang-day/xet-dieu-kien-thi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"nha-giao-giang-day",
+								"xet-dieu-kien-thi"
+							]
+						},
+						"description": "Hệ thống tự động tính TBC = (TX + ĐK*2)/3 và phân loại Đạt (TBC >= 5.0) hoặc Không đạt (TBC < 5.0)."
+					},
+					"response": [
+						{
+							"name": "200 Success",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Xét điều kiện dự thi hoàn tất.\",\n  \"thong_ke\": {\n    \"tong_so\": 3,\n    \"so_luong_dat\": 2,\n    \"so_luong_khong_dat\": 1\n  },\n  \"danh_sach\": [\n    {\"ma_hssv\": \"20210001\", \"tbc\": 7.3, \"dieu_kien_du_thi\": true, \"ket_luan\": \"Đạt\"},\n    {\"ma_hssv\": \"20210002\", \"tbc\": 3.3, \"dieu_kien_du_thi\": false, \"ket_luan\": \"KĐ (Không đạt)\"},\n    {\"ma_hssv\": \"20210003\", \"tbc\": 9.0, \"dieu_kien_du_thi\": true, \"ket_luan\": \"Đạt\"}\n  ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bước 4. Ghép điểm thi & Tổng hợp điểm môn học",
+			"item": [
+				{
+					"name": "PUT /api/v1/nha-giao-cham-thi/ghep-diem-thi",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_gvct}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ma_phieu\": \"PKQ-WEB-01\",\n  \"lan_thi\": 1,\n  \"danh_sach_diem_thi\": [\n    {\n      \"ma_hssv\": \"20210001\",\n      \"diem_thi\": 8.0\n    },\n    {\n      \"ma_hssv\": \"20210003\",\n      \"diem_thi\": 9.5\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/nha-giao-cham-thi/ghep-diem-thi",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"nha-giao-cham-thi",
+								"ghep-diem-thi"
+							]
+						},
+						"description": "Nhà giáo chấm thi nhập điểm thi kết thúc cho các sinh viên đủ điều kiện dự thi."
+					},
+					"response": [
+						{
+							"name": "200 Success",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Nhà giáo chấm thi ghép điểm thi kết thúc thành công.\",\n  \"trang_thai\": \"Da_ghep_diem_thi\"\n}"
+						}
+					]
+				},
+				{
+					"name": "POST /api/v1/nha-giao-giang-day/tong-hop-ket-qua-hoc-tap",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_gvg}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ma_phieu\": \"PKQ-WEB-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/nha-giao-giang-day/tong-hop-ket-qua-hoc-tap",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"nha-giao-giang-day",
+								"tong-hop-ket-qua-hoc-tap"
+							]
+						},
+						"description": "Nhà giáo giảng dạy tổng hợp: Tổng kết = TBC*0.4 + Thi*0.6, quy đổi điểm chữ (A,B,C,D,F) và điểm hệ 4."
+					},
+					"response": [
+						{
+							"name": "200 Success",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Tổng hợp kết quả học tập môn học thành công.\",\n  \"thong_ke_xep_loai\": {\n    \"loai_A\": 1,\n    \"loai_B\": 1,\n    \"loai_C\": 0,\n    \"loai_D\": 0,\n    \"loai_F\": 1\n  }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bước 5. Ký duyệt kết quả cấp Khoa",
+			"item": [
+				{
+					"name": "PUT /api/v1/khoa-chuyen-mon/phe-duyet",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_kcm}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ma_phieu\": \"PKQ-WEB-01\",\n  \"y_kien_phe_duyet\": \"Đồng ý phê duyệt bảng điểm. Đảm bảo đúng quy chế thi và tiến độ đào tạo.\",\n  \"xac_nhan\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/khoa-chuyen-mon/phe-duyet",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"khoa-chuyen-mon",
+								"phe-duyet"
+							]
+						},
+						"description": "Khoa chuyên môn kiểm tra tính hợp lệ và ký duyệt số Phiếu kết quả học tập."
+					},
+					"response": [
+						{
+							"name": "200 Success",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Khoa chuyên môn đã phê duyệt Phiếu kết quả học tập.\",\n  \"trang_thai\": \"Khoa_da_duyet\",\n  \"ngay_duyet\": \"2026-10-22\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bước 6. Nộp phiếu bản gốc về Phòng ĐT&NCKH",
+			"item": [
+				{
+					"name": "POST /api/v1/nha-giao-giang-day/gui-phieu-ve-phong-dtnckh",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_gvg}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ma_phieu\": \"PKQ-WEB-01\",\n  \"ghi_chu_ban_giao\": \"Bàn giao Phiếu kết quả học tập bản gốc có đầy đủ chữ ký GVG, GVCT và Trưởng Khoa.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/nha-giao-giang-day/gui-phieu-ve-phong-dtnckh",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"nha-giao-giang-day",
+								"gui-phieu-ve-phong-dtnckh"
+							]
+						},
+						"description": "Nhà giáo giảng dạy nộp Phiếu kết quả học tập bản gốc về Phòng ĐT&NCKH."
+					},
+					"response": [
+						{
+							"name": "200 Success",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Đã gửi biên bản bàn giao phiếu điểm về Phòng ĐT&NCKH.\",\n  \"trang_thai\": \"Da_gui_Phong_DTNCKH\",\n  \"ngay_gui\": \"2026-10-22\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bước 7. Tiếp nhận & Tổng hợp điểm lên phần mềm",
+			"item": [
+				{
+					"name": "POST /api/v1/phong-dtnckh/tong-hop-diem-len-phan-mem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_dtnckh}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ma_phieu\": \"PKQ-WEB-01\",\n  \"xac_nhan_luu_phan_mem\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/phong-dtnckh/tong-hop-diem-len-phan-mem",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"phong-dtnckh",
+								"tong-hop-diem-len-phan-mem"
+							]
+						},
+						"description": "Phòng ĐT&NCKH tiếp nhận, đối soát và khóa điểm chính thức lên hệ thống toàn trường."
+					},
+					"response": [
+						{
+							"name": "200 Success",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"body": "{\n  \"success\": true,\n  \"message\": \"Phòng ĐT&NCKH đã khóa và tổng hợp điểm lên phần mềm quản lý thành công.\",\n  \"trang_thai\": \"Da_tong_hop\",\n  \"ngay_tong_hop\": \"2026-10-22\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bước 10. Xuất và lưu trữ hồ sơ điểm điện tử",
+			"item": [
+				{
+					"name": "GET /api/v1/ho-so/xuat-excel?ma_phieu=PKQ-WEB-01",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_dtnckh}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ho-so/xuat-excel?ma_phieu=PKQ-WEB-01",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ho-so",
+								"xuat-excel"
+							],
+							"query": [
+								{
+									"key": "ma_phieu",
+									"value": "PKQ-WEB-01"
+								}
+							]
+						},
+						"description": "Xuất tệp bảng tính Excel biểu mẫu BM/03 lưu trữ hồ sơ điểm."
+					},
+					"response": [
+						{
+							"name": "200 File Binary Response",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "raw",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+								},
+								{
+									"key": "Content-Disposition",
+									"value": "attachment; filename=\"BangDiem_PKQ-WEB-01.xlsx\""
+								}
+							],
+							"body": "<Binary Excel Data>"
+						}
+					]
+				},
+				{
+					"name": "GET /api/v1/ho-so/xuat-pdf?ma_phieu=PKQ-WEB-01",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token_dtnckh}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/ho-so/xuat-pdf?ma_phieu=PKQ-WEB-01",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ho-so",
+								"xuat-pdf"
+							],
+							"query": [
+								{
+									"key": "ma_phieu",
+									"value": "PKQ-WEB-01"
+								}
+							]
+						},
+						"description": "Xuất tệp tài liệu PDF có đầy đủ chữ ký số lưu trữ hồ sơ vĩnh viễn."
+					},
+					"response": [
+						{
+							"name": "200 PDF Document Response",
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "raw",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/pdf"
+								},
+								{
+									"key": "Content-Disposition",
+									"value": "attachment; filename=\"BangDiem_PKQ-WEB-01.pdf\""
+								}
+							],
+							"body": "<PDF Stream Data>"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://api.cdcn.edu.vn",
+			"type": "string"
+		},
+		{
+			"key": "token_gvg",
+			"value": "mock_jwt_token_nha_giao_giang_day",
+			"type": "string"
+		},
+		{
+			"key": "token_gvct",
+			"value": "mock_jwt_token_nha_giao_cham_thi",
+			"type": "string"
+		},
+		{
+			"key": "token_kcm",
+			"value": "mock_jwt_token_khoa_chuyen_mon",
+			"type": "string"
+		},
+		{
+			"key": "token_dtnckh",
+			"value": "mock_jwt_token_phong_dtnckh",
+			"type": "string"
+		}
+	]
+}
